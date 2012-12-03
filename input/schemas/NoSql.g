@@ -33,6 +33,8 @@ tokens {
 	WHERE_CLAUSE;
 	ALIAS;
 	IN_PARENS;
+	UPDATE_CLAUSE;
+	TABLE_CLAUSE;
 
 	AS	=	'as';
 	DOT	=	'.';
@@ -51,6 +53,7 @@ tokens {
 	OR	=	'or';
 	NOT	=	'not';
 	IN	=	'in';
+	SET =	'set';
 	
 }
 
@@ -83,7 +86,7 @@ package com.alvazan.orm.parser.antlr;
     }
 }
 
-statement: (  selectStatement EOF! );
+statement: (  selectStatement | updateStatement EOF! );
 
 //SELECT PORTION SPECIFIC STUFF
 selectStatement: (partitionClause)? selectClause fromClause (joinClause)? (whereClause)? -> fromClause (joinClause)? (partitionClause)? selectClause (whereClause)?;
@@ -93,6 +96,13 @@ resultList
  : STAR          -> ^(SELECT_RESULTS STAR)
  | columnList -> ^(SELECT_RESULTS columnList)
  ;
+ 
+
+// UPDATE statement
+updateStatement: UPDATE tableClause updateClause (whereClause)+ -> tableClause (whereClause)+ updateClause UPDATE;
+tableClause: table -> ^(TABLE_CLAUSE table);
+updateClause: SET updateCondition -> ^(UPDATE_CLAUSE updateCondition);
+updateCondition:  column EQ^ value;
  
 columnList:	simpleColumn (COMMA! simpleColumn)* | aliasedColumn (COMMA! aliasedColumn)*;
 
@@ -177,6 +187,7 @@ NULL    :   ('N'|'n')('U'|'u')('L'|'l')('L'|'l');
 BETWEEN :   ('B'|'b')('E'|'e')('T'|'t')('W'|'w')('E'|'e')('E'|'e')('N'|'n');
 FALSE   :   ('F'|'f')('A'|'a')('L'|'l')('S'|'s')('E'|'e');
 TRUE    :   ('T'|'t')('R'|'r')('U'|'u')('E'|'e');
+UPDATE  :   ('U'|'u')('P'|'p')('D'|'d')('A'|'a')('T'|'t')('E'|'e');
 
 // Lexer Rules
 ID	:	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_'|'-')*;
