@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.alvazan.orm.api.z8spi.meta.TypeInfo;
 import com.alvazan.orm.api.z8spi.meta.ViewInfo;
+import com.alvazan.orm.parser.antlr.ExpressionNode;
 
 public interface SpiMetaQuery {
 	
@@ -40,5 +41,7 @@ public interface SpiMetaQuery {
 	 * @return
 	 */
 	public List<ViewInfo> getViewsEagerJoin();
+
+	public ExpressionNode getUpdateTree();
 	
 }

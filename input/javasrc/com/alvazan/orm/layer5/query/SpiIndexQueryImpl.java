@@ -56,6 +56,10 @@ public class SpiIndexQueryImpl implements SpiQueryAdapter {
 			throw new IllegalStateException("You did not call query.setParameter(\""+parameterName+"\", <yourvalue>) and that parameter is required");
 		return result;
 	}
+	@Override
+	public SpiMetaQueryImpl getSpiMeta() {
+		return spiMeta;
+	}
 
 	@Override
 	public DirectCursor<IndexColumnInfo> getResultList(Set<ViewInfo> alreadyJoinedViews) {
@@ -283,5 +287,5 @@ public class SpiIndexQueryImpl implements SpiQueryAdapter {
 			throw new IllegalArgumentException("batchSize must be 1 or greater, but really, please don't use 1, use something like 500(the default anyways)");
 		this.batchSize = batchSize;
 	}
-	
+
 }

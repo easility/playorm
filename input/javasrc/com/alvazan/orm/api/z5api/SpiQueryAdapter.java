@@ -26,4 +26,6 @@ public interface SpiQueryAdapter {
 	 */
 	public void setBatchSize(int batchSize);
 
+	public SpiMetaQuery getSpiMeta();
+
 }

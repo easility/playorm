@@ -18,7 +18,7 @@ public class SpiMetaQueryImpl implements SpiMetaQuery {
 
 	@Inject
 	private Provider<SpiIndexQueryImpl> factory;
-	private ExpressionNode astTreeRoot;
+	private ExpressionNode astTreeRoot, updateTree;
 	private Map<String, TypeInfo> parameterFieldMap;
 	private String query;
 	private List<ViewInfo> viewsEagerJoin;
@@ -78,6 +78,15 @@ public class SpiMetaQueryImpl implements SpiMetaQuery {
 	@Override
 	public List<ViewInfo> getViewsEagerJoin() {
 		return viewsEagerJoin;
+	}
+
+	public void setUpdateTree(ExpressionNode node) {
+		this.updateTree = node;
+	}
+
+	@Override
+	public ExpressionNode getUpdateTree() {
+		return updateTree;
 	}
 	
 }

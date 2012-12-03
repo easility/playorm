@@ -18,7 +18,7 @@ public class InfoForWiring {
 	private Map<String, ViewInfoImpl> aliasToMeta = new HashMap<String, ViewInfoImpl>();
 	private boolean selectStarDefined;
 	private String query;
-	private ExpressionNode astTree;
+	private ExpressionNode astTree, updateTree;
 	private Map<String, Integer> attributeUsedCount = new HashMap<String, Integer>();
 	private DboTableMeta metaQueryTargetTable;
 	private List<ViewInfo> targetViews = new ArrayList<ViewInfo>();
@@ -115,4 +115,11 @@ public class InfoForWiring {
 		return eagerlyJoinedViews;
 	}
 
+	public void setUpdateTree(ExpressionNode node) {
+		this.updateTree = node;
+	}
+
+	public ExpressionNode getUpdateTree() {
+		return updateTree;
+	}
 }
