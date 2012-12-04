@@ -86,7 +86,8 @@ package com.alvazan.orm.parser.antlr;
     }
 }
 
-statement: (  selectStatement EOF! | updateStatement EOF! );
+statement: ( sqlStatement EOF! );
+sqlStatement: selectStatement | updateStatement;
 
 //SELECT PORTION SPECIFIC STUFF
 selectStatement: (partitionClause)? selectClause fromClause (joinClause)? (whereClause)? -> fromClause (joinClause)? (partitionClause)? selectClause (whereClause)?;
@@ -96,15 +97,14 @@ resultList
  : STAR          -> ^(SELECT_RESULTS STAR)
  | columnList -> ^(SELECT_RESULTS columnList)
  ;
- 
+
+columnList:	simpleColumn (COMMA! simpleColumn)* | aliasedColumn (COMMA! aliasedColumn)*;
 
 // UPDATE statement
 updateStatement: UPDATE tableClause updateClause (whereClause)+ -> tableClause (whereClause)+ updateClause UPDATE;
 tableClause: table -> ^(TABLE_CLAUSE table);
-updateClause: SET updateCondition -> ^(UPDATE_CLAUSE updateCondition);
+updateClause: SET LPAREN updateCondition (COMMA updateCondition)* RPAREN -> ^(UPDATE_CLAUSE updateCondition (updateCondition)*);
 updateCondition:  column EQ^ value;
- 
-columnList:	simpleColumn (COMMA! simpleColumn)* | aliasedColumn (COMMA! aliasedColumn)*;
 
 //PARTITONS CLAUSE SPECIFIC STUFF (for adhoc queries ONLY!!!!)
 partitionClause: PARTITIONS partitionList -> ^(PARTITIONS_CLAUSE partitionList);

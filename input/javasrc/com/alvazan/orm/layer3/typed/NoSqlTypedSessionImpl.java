@@ -251,39 +251,29 @@ public class NoSqlTypedSessionImpl implements NoSqlTypedSession {
 		QueryResultImpl impl = (QueryResultImpl) result;
 		SpiMetaQuery metaQuery = impl.getMetaQuery();
 		List<TypedColumn> updateList = metaQuery.getUpdateList();
-		TypedColumn columnforUpdate = updateList.get(0);
-		if (columnforUpdate == null)
+		if (updateList.size() == 0)
 			throw new IllegalArgumentException("UPDATE should have some values to set");
 		while(cursor.next()) {
 			List<TypedRow> joinedRow = cursor.getCurrent();
-			updateRow(joinedRow, columnforUpdate);
+			updateRow(joinedRow, updateList);
 			rowCount++;
 		}
 		return rowCount;
 	}
 
-	private void updateRow(List<TypedRow> joinedRow, TypedColumn columnforUpdate) {
-		String columnName = columnforUpdate.getName();
-		Object value = columnforUpdate.getValue();
+	private void updateRow(List<TypedRow> joinedRow, List<TypedColumn> updateList) {
 		for(TypedRow r: joinedRow) {
 			ViewInfo view = r.getView();
 			DboTableMeta meta = view.getTableMeta();
 			for(TypedColumn c : r.getColumnsAsColl()) {
-				DboColumnMeta colMeta = c.getColumnMeta();
-				if(colMeta != null) {
-					String fullName = c.getName();
-					if (columnName.toString().equals(fullName)) {
-						c.setValue(value);	
-						put(meta.getColumnFamily(), r);						
-					}
-				} else {
-					String fullName = c.getNameAsString(byte[].class);
-					if (columnName.toString().equals(fullName)) {
-						c.setValue(value);	
-						put(meta.getColumnFamily(), r);
+				for (TypedColumn columnforUpdate : updateList ) {
+					if (columnforUpdate.getName().equals(c.getName())) {
+						Object value = columnforUpdate.getValue();
+						c.setValue(value);		
 					}
 				}
 			}
+			put(meta.getColumnFamily(), r);	
 		}
 	}
 

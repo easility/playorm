@@ -303,16 +303,19 @@ public class ScannerSql {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private <T> void compileUpdateClause(CommonTree tree,
 			InfoForWiring wiring, MetaFacade facade) {
-		CommonTree expression = (CommonTree)tree.getChildren().get(0);
-		ExpressionNode node = new ExpressionNode(expression);
-		compileExpression(node, wiring, facade);
 		List<TypedColumn> updateList = new ArrayList<TypedColumn>(); 
-		TypeInfo columnTypeInfo = processSide(node.getChild(ChildSide.LEFT), wiring, null, facade);
-		byte[] value = retrieveValue(columnTypeInfo.getColumnInfo(), node.getChild(ChildSide.RIGHT));
-		TypedColumn columnforUpdate = new TypedColumn(columnTypeInfo.getColumnInfo(), columnTypeInfo.getColumnInfo().getColumnNameAsBytes(), value, null);
-		updateList.add(columnforUpdate);
+		List<CommonTree> childrenList = tree.getChildren();
+		for (CommonTree child : childrenList) {
+			ExpressionNode node = new ExpressionNode(child);
+			compileExpression(node, wiring, facade);
+			TypeInfo columnTypeInfo = processSide(node.getChild(ChildSide.LEFT), wiring, null, facade);
+			byte[] value = retrieveValue(columnTypeInfo.getColumnInfo(), node.getChild(ChildSide.RIGHT));
+			TypedColumn columnforUpdate = new TypedColumn(columnTypeInfo.getColumnInfo(), columnTypeInfo.getColumnInfo().getColumnNameAsBytes(), value, null);
+			updateList.add(columnforUpdate);
+		}
 		wiring.setUpdateList(updateList);
 	}
 
