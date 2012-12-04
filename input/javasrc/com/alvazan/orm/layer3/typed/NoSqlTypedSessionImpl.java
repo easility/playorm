@@ -34,8 +34,7 @@ import com.alvazan.orm.api.z8spi.meta.RowToPersist;
 import com.alvazan.orm.api.z8spi.meta.TypedColumn;
 import com.alvazan.orm.api.z8spi.meta.TypedRow;
 import com.alvazan.orm.api.z8spi.meta.ViewInfo;
-import com.alvazan.orm.parser.antlr.ChildSide;
-import com.alvazan.orm.parser.antlr.ExpressionNode;
+
 
 public class NoSqlTypedSessionImpl implements NoSqlTypedSession {
 
@@ -239,34 +238,33 @@ public class NoSqlTypedSessionImpl implements NoSqlTypedSession {
 		TypedRow r = new TypedRow(null, metaClass);
 		return r;
 	}
-
 	@Override
 	public int updateQuery(String query) {
 		int batchSize = 250;
 		QueryResult result = createQueryCursor(query,batchSize);
 		Cursor<List<TypedRow>> cursor = result.getAllViewsCursor();
-		return updateBatch(query, cursor);
+		return updateBatch(cursor, result);
 	}
 
-	private int updateBatch(String query, Cursor<List<TypedRow>> cursor) {
+	private int updateBatch(Cursor<List<TypedRow>> cursor, QueryResult result) {
 		int rowCount = 0;
+		QueryResultImpl impl = (QueryResultImpl) result;
+		SpiMetaQuery metaQuery = impl.getMetaQuery();
+		List<TypedColumn> updateList = metaQuery.getUpdateList();
+		TypedColumn columnforUpdate = updateList.get(0);
+		if (columnforUpdate == null)
+			throw new IllegalArgumentException("UPDATE should have some values to set");
 		while(cursor.next()) {
 			List<TypedRow> joinedRow = cursor.getCurrent();
-			updateRow(query, joinedRow);
+			updateRow(joinedRow, columnforUpdate);
 			rowCount++;
 		}
 		return rowCount;
 	}
 
-	private void updateRow(String query, List<TypedRow> joinedRow) {
-		SpiMetaQuery metaQuery = noSqlSessionFactory.parseQueryForAdHoc(query, mgr);
-		SpiQueryAdapter spiQueryAdapter = metaQuery.createQueryInstanceFromQuery(session); 
-		ExpressionNode root = spiQueryAdapter.getSpiMeta().getUpdateTree();
-		if (root == null)
-			throw new IllegalArgumentException("UPDATE should have some values to set");
-		ExpressionNode columnName = root.getChild(ChildSide.LEFT);
-		ExpressionNode value = root.getChild(ChildSide.RIGHT);
-		String withoutQuotes = value.toString().substring(1, value.toString().length()-1);
+	private void updateRow(List<TypedRow> joinedRow, TypedColumn columnforUpdate) {
+		String columnName = columnforUpdate.getName();
+		Object value = columnforUpdate.getValue();
 		for(TypedRow r: joinedRow) {
 			ViewInfo view = r.getView();
 			DboTableMeta meta = view.getTableMeta();
@@ -275,14 +273,16 @@ public class NoSqlTypedSessionImpl implements NoSqlTypedSession {
 				if(colMeta != null) {
 					String fullName = c.getName();
 					if (columnName.toString().equals(fullName)) {
-						c.setValue(withoutQuotes);	
+						c.setValue(value);	
 						put(meta.getColumnFamily(), r);						
 					}
 				} else {
 					String fullName = c.getNameAsString(byte[].class);
-					String val = c.getValueAsString(byte[].class);
-					// will re-vist again what to do in this case
-				}	
+					if (columnName.toString().equals(fullName)) {
+						c.setValue(value);	
+						put(meta.getColumnFamily(), r);
+					}
+				}
 			}
 		}
 	}

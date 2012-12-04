@@ -56,10 +56,6 @@ public class SpiIndexQueryImpl implements SpiQueryAdapter {
 			throw new IllegalStateException("You did not call query.setParameter(\""+parameterName+"\", <yourvalue>) and that parameter is required");
 		return result;
 	}
-	@Override
-	public SpiMetaQueryImpl getSpiMeta() {
-		return spiMeta;
-	}
 
 	@Override
 	public DirectCursor<IndexColumnInfo> getResultList(Set<ViewInfo> alreadyJoinedViews) {

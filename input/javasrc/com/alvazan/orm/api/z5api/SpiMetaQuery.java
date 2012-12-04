@@ -3,8 +3,8 @@ package com.alvazan.orm.api.z5api;
 import java.util.List;
 
 import com.alvazan.orm.api.z8spi.meta.TypeInfo;
+import com.alvazan.orm.api.z8spi.meta.TypedColumn;
 import com.alvazan.orm.api.z8spi.meta.ViewInfo;
-import com.alvazan.orm.parser.antlr.ExpressionNode;
 
 public interface SpiMetaQuery {
 	
@@ -42,6 +42,6 @@ public interface SpiMetaQuery {
 	 */
 	public List<ViewInfo> getViewsEagerJoin();
 
-	public ExpressionNode getUpdateTree();
+	public List<TypedColumn> getUpdateList();
 	
 }
