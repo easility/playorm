@@ -86,7 +86,7 @@ package com.alvazan.orm.parser.antlr;
     }
 }
 
-statement: (  selectStatement | updateStatement EOF! );
+statement: (  selectStatement EOF! | updateStatement EOF! );
 
 //SELECT PORTION SPECIFIC STUFF
 selectStatement: (partitionClause)? selectClause fromClause (joinClause)? (whereClause)? -> fromClause (joinClause)? (partitionClause)? selectClause (whereClause)?;
